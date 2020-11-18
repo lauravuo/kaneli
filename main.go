@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	path "net/url"
+	"os"
 )
 
 type Song struct {
@@ -38,9 +39,13 @@ type SpotifyResponse struct {
 }
 
 func main() {
+	sToken := os.Getenv("SPOTIFY_USER_TOKEN")
+	//sToken := fetchSpotifyClientToken()
+	if sToken == "" {
+		sToken = fetchSpotifyUserToken()
+	}
 
-	sToken := fetchSpotifyToken()
-
+	// loop all interesting lists
 	url := "https://jouluradio-wp.production.geniem.io/viimeksi-soitetut/"
 
 	data, err := doGetRequest(url, "")
@@ -58,6 +63,7 @@ func main() {
 				r, err := doGetRequest(fmt.Sprintf("https://api.spotify.com/v1/search?type=track&q=%s", q), fmt.Sprintf("Bearer %s", sToken))
 				resp := SpotifyResponse{}
 				jsonErr = json.Unmarshal(r, &resp)
+				// Store first item to redis
 				fmt.Println(resp)
 				fmt.Println(err)
 			}
