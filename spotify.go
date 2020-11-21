@@ -11,7 +11,6 @@ import (
 	"net/url"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/pkg/browser"
 )
@@ -46,55 +45,58 @@ func fetchSpotifyClientToken() string {
 
 func fetchSpotifyUserToken() string {
 	if clientID == "" && clientSecret == "" {
-		panic(fmt.Errorf("Spotify client ID and secret missing!"))
+		panic(fmt.Errorf("spotify client ID and secret missing"))
 	}
 
-	token := ""
+	code := ""
 	state := strconv.FormatInt(int64(rand.Int()), 10)
 	scope := "playlist-modify-public&playlist-modify-private"
-	const redirectURI = "http://localhost:4321"
-	path := fmt.Sprintf("https://accounts.spotify.com/authorize?client_id=%s&response_type=code&redirect_uri=%s&scope=%s&state=%s", clientID, redirectURI, scope, state)
+	const (
+		redirectURL     = "http://localhost:4321"
+		spotifyLoginURL = "https://accounts.spotify.com/authorize?client_id=%s&response_type=code&redirect_uri=%s&scope=%s&state=%s"
+	)
+	path := fmt.Sprintf(spotifyLoginURL, clientID, redirectURL, scope, state)
 
-	browser.OpenURL(path)
+	if err := browser.OpenURL(path); err != nil {
+		panic(fmt.Errorf("failed to open browser for authentication %s", err.Error()))
+	}
 	server := &http.Server{Addr: ":4321"}
+	messages := make(chan bool)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Spotify callback")
+		fmt.Println("Spotify callback", r.Method, r.URL.Query())
 		if s, ok := r.URL.Query()["state"]; ok && s[0] == state {
-			if code, ok := r.URL.Query()["code"]; ok {
-				params := url.Values{}
-				params.Add("grant_type", "authorization_code")
-				params.Add("code", code[0])
-				params.Add("redirect_uri", redirectURI)
-				data, err := doPostRequest(
-					"https://accounts.spotify.com/api/token",
-					params,
-					authHeader,
-				)
-				if err == nil {
-					response := Token{}
-					if err = json.Unmarshal(data, &response); err == nil {
-						token = response.AccessToken
-					}
-				} else {
-					panic(fmt.Errorf("Unable to acquire Spotify user token!"))
-				}
+			if codes, ok := r.URL.Query()["code"]; ok {
+				code = codes[0]
+				messages <- true
 			}
 		}
-		w.Write([]byte("OK, you can close this window"))
-
-		// TODO: Do only after process completed
-		time.AfterFunc(5*time.Second, func() {
-			ctxShutDown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-			if err := server.Shutdown(ctxShutDown); err != nil {
-				panic(fmt.Errorf("Unable to acquire Spotify user token!"))
-			}
-		})
+		http.Redirect(w, r, "https://www.spotify.com/", http.StatusSeeOther)
 	})
-	log.Print(server.ListenAndServe())
 
-	if token == "" {
-		panic(fmt.Errorf("Unable to acquire Spotify user token!"))
+	go func() {
+		okToClose := <-messages
+		if okToClose {
+			if err := server.Shutdown(context.Background()); err != nil {
+				log.Println("Failed to shutdown server", err)
+			}
+		}
+	}()
+	log.Println(server.ListenAndServe())
+
+	params := url.Values{}
+	params.Add("grant_type", "authorization_code")
+	params.Add("code", code)
+	params.Add("redirect_uri", redirectURL)
+	data, err := doPostRequest(
+		"https://accounts.spotify.com/api/token",
+		params,
+		authHeader,
+	)
+	if err == nil {
+		response := Token{}
+		if err = json.Unmarshal(data, &response); err == nil {
+			return response.AccessToken
+		}
 	}
-	return token
+	panic(fmt.Errorf("unable to acquire Spotify user token"))
 }
