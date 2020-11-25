@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -48,11 +50,38 @@ func doPostRequest(url string, values url.Values, authHeader string) (data []byt
 	if err != nil {
 		return
 	}
+	defer res.Body.Close()
 
 	data, err = ioutil.ReadAll(res.Body)
 	if err != nil {
 		return
 	}
 	return
+}
 
+func doJSONRequest(path string, method string, values interface{}, authHeader string) (data []byte, err error) {
+	payload, err := json.Marshal(values)
+	if err != nil {
+		return
+	}
+
+	req, err := http.NewRequestWithContext(context.TODO(), method, path, bytes.NewBuffer(payload))
+	if err != nil {
+		return
+	}
+
+	req.Header.Set("Authorization", authHeader)
+	req.Header.Set("Content-Type", "application/json")
+
+	res, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	defer res.Body.Close()
+
+	data, err = ioutil.ReadAll(res.Body)
+	if err != nil {
+		return
+	}
+	return
 }
