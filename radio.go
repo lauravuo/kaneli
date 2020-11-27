@@ -34,13 +34,13 @@ type SpotifyResponse struct {
 				Spotify string `json:"spotify"`
 			} `json:"external_urls"`
 			ID  string `json:"id"`
-			Uri string `json:"uri"`
+			URI string `json:"uri"`
 		} `json:"items"`
 	} `json:"tracks"`
 }
 
 type SpotifyRemoveItem struct {
-	Uri string `json:"uri"`
+	URI string `json:"uri"`
 }
 
 type SpotifyPlaylistDelete struct {
@@ -48,12 +48,12 @@ type SpotifyPlaylistDelete struct {
 }
 
 type SpotifyPlaylistModify struct {
-	Uris     []string `json:"uris"`
+	URIs     []string `json:"uris"`
 	Position int      `json:"position"`
 }
 
-func addSongsFromRadioToPlaylist(radioUrl, playlistID, spotifyToken string) (err error) {
-	data, err := doGetRequest(radioUrl, "")
+func addSongsFromRadioToPlaylist(radioURL, playlistID, spotifyToken string) (err error) {
+	data, err := doGetRequest(radioURL, "")
 	if err != nil {
 		return err
 	}
@@ -87,9 +87,9 @@ func addSongsFromRadioToPlaylist(radioUrl, playlistID, spotifyToken string) (err
 		// just pick the first found track
 		if len(trackData.Tracks.Items) > 0 {
 			item := trackData.Tracks.Items[0]
-			fmt.Printf("Add track %s %s\n", track.Artist, track.Song)
-			songIds = append(songIds, item.Uri)
-			removeIds = append(removeIds, &SpotifyRemoveItem{Uri: item.Uri})
+			fmt.Printf("Add track %s: %s\n", track.Artist, track.Song)
+			songIds = append(songIds, item.URI)
+			removeIds = append(removeIds, &SpotifyRemoveItem{URI: item.URI})
 		}
 	}
 
@@ -102,6 +102,6 @@ func addSongsFromRadioToPlaylist(radioUrl, playlistID, spotifyToken string) (err
 	}
 
 	// then add all tracks to the start of the list
-	_, err = doJSONRequest(apiPath, http.MethodPost, &SpotifyPlaylistModify{Uris: songIds, Position: 0}, bearerHeader)
+	_, err = doJSONRequest(apiPath, http.MethodPost, &SpotifyPlaylistModify{URIs: songIds, Position: 0}, bearerHeader)
 	return err
 }

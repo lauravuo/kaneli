@@ -24,6 +24,9 @@ var (
 	authHeader   = fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(clientID+":"+clientSecret)))
 )
 
+/*
+// If we would use only such Spotify APIs that do not require user permission,
+// client token would be sufficient
 func fetchClientToken() string {
 	if clientID == "" && clientSecret == "" {
 		panic(fmt.Errorf("spotify client ID and secret missing!"))
@@ -40,6 +43,7 @@ func fetchClientToken() string {
 
 	panic(fmt.Errorf("Unable to acquire Spotify token!"))
 }
+*/
 
 func fetchUserToken() string {
 	const (

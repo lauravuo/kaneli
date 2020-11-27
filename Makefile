@@ -1,5 +1,5 @@
 run:
-	go run ./... $(SPOTIFY_PLAYLIST_ID)
+	go run . $(SPOTIFY_PLAYLIST_ID)
 
 build:
 	go build ./...

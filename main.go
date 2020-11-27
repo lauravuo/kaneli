@@ -8,6 +8,7 @@ import (
 
 const (
 	argIndexPlayListID = 1
+	sleepSeconds       = 5
 )
 
 func main() {
@@ -23,6 +24,7 @@ func main() {
 		"https://jouluradio-wp.production.geniem.io/viimeksi-soitetut/",
 		"https://jouluradio-wp.production.geniem.io/viimeksi-soitetut/?kanava=indiejoulu",
 		"https://jouluradio-wp.production.geniem.io/viimeksi-soitetut/?kanava=jazzjoulu",
+		"https://jouluradio-wp.production.geniem.io/viimeksi-soitetut/?kanava=klassinen-joulu",
 	}
 	for _, radioURL := range radioUrls {
 		fmt.Printf("Adding songs from %s\n", radioURL)
@@ -30,7 +32,7 @@ func main() {
 			fmt.Printf("Error when adding songs %s\n", err.Error())
 		}
 		fmt.Printf("Sleeping a while...\n")
-		time.Sleep(5 * time.Second)
+		time.Sleep(sleepSeconds * time.Second)
 	}
 
 	fmt.Println("All done! Merry Christmas! Hyvää joulua!")
