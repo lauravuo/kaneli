@@ -15,8 +15,8 @@ var client = http.Client{
 	Timeout: time.Second * 2, // Timeout after 2 seconds
 }
 
-func doGetRequest(url, authHeader string) (data []byte, err error) {
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, url, nil)
+func doGetRequest(path, authHeader string) (data []byte, err error) {
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, path, nil)
 	if err != nil {
 		return
 	}
@@ -29,6 +29,7 @@ func doGetRequest(url, authHeader string) (data []byte, err error) {
 	if err != nil {
 		return
 	}
+	defer res.Body.Close()
 
 	data, err = ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -37,8 +38,8 @@ func doGetRequest(url, authHeader string) (data []byte, err error) {
 	return
 }
 
-func doPostRequest(url string, values url.Values, authHeader string) (data []byte, err error) {
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodPost, url, strings.NewReader(values.Encode()))
+func doPostRequest(path string, values url.Values, authHeader string) (data []byte, err error) {
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodPost, path, strings.NewReader(values.Encode()))
 	if err != nil {
 		return
 	}
@@ -59,7 +60,7 @@ func doPostRequest(url string, values url.Values, authHeader string) (data []byt
 	return
 }
 
-func doJSONRequest(path string, method string, values interface{}, authHeader string) (data []byte, err error) {
+func doJSONRequest(path, method string, values interface{}, authHeader string) (data []byte, err error) {
 	payload, err := json.Marshal(values)
 	if err != nil {
 		return
