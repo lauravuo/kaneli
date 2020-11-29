@@ -5,7 +5,7 @@ Kaneli (cinnamon in Finnish) is a command line program that adds songs from [Jou
 ## Setup
 
 1. Install [golang](https://golang.org/)
-1. Create new application from [Spotify developer dashboard](https://developer.spotify.com/dashboard/)
+1. Create new application in [Spotify developer dashboard](https://developer.spotify.com/dashboard/). Define `http://localhost:4321` as the callback URL.
 1. Copy the app client id and secret from the Spotify developer UI. Define following env variables:
 
 ```bash
