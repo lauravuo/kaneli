@@ -48,7 +48,6 @@ func addChristmasRadioLists(playlistID, sToken string) {
 	}
 
 	fmt.Println("All done! Merry Christmas! Hyvää joulua!")
-
 }
 
 func fetchChristmasRadioSongs(url string) ([]*Track, error) {

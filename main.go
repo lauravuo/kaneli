@@ -32,7 +32,3 @@ func main() {
 	}
 	fmt.Printf("https://open.spotify.com/playlist/%s\n", playlistID)
 }
-
-func christmasRadio() {
-
-}
