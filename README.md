@@ -19,7 +19,7 @@ export SPOTIFY_CLIENT_SECRET=xxx
 1. Run the app by giving the playlist id (without the `spotify:playlist:` part) as command line argument:
 
     ```bash
-    go run . 5x5mdsVit4ngNyvglqkO8f
+    go run . 5x5mdsVit4ngNyvglqkO8f christmas
     ```
     
 1. The app will open browser for Spotify authentication. Log in and give app permission to modify your playlists.
