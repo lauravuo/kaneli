@@ -7,26 +7,6 @@ import (
 	"net/url"
 )
 
-type Song struct {
-	Artist  string `json:"artist"`
-	Channel int32  `json:"channel"`
-	Song    string `json:"song"`
-	Time    string `json:"time"`
-}
-
-type RadioResponse struct {
-	PageLastPlayed struct {
-		Content struct {
-			Hero struct {
-				Text string `json:"text"`
-			} `json:"Hero"`
-			RecentlyPlayed struct {
-				Songs []Song `json:"songs"`
-			} `json:"recently_played"`
-		} `json:"Content"`
-	} `json:"PageLastPlayed"`
-}
-
 type SpotifyResponse struct {
 	Tracks struct {
 		Items []struct {
@@ -52,24 +32,13 @@ type SpotifyPlaylistModify struct {
 	Position int      `json:"position"`
 }
 
-func addSongsFromRadioToPlaylist(radioURL, playlistID, spotifyToken string) (err error) {
-	data, err := doGetRequest(radioURL, "")
-	if err != nil {
-		return err
-	}
-
-	response := RadioResponse{}
-	err = json.Unmarshal(data, &response)
-	if err != nil {
-		return err
-	}
-
+func addSongsFromRadioToPlaylist(tracks []*Track, playlistID, spotifyToken string) (err error) {
 	songIds := make([]string, 0)
 	removeIds := make([]*SpotifyRemoveItem, 0)
 	bearerHeader := fmt.Sprintf("Bearer %s", spotifyToken)
 
-	for _, track := range response.PageLastPlayed.Content.RecentlyPlayed.Songs {
-		query := url.QueryEscape(fmt.Sprintf("artist:%s track:%s", track.Artist, track.Song))
+	for _, track := range tracks {
+		query := url.QueryEscape(fmt.Sprintf("artist:%s track:%s", track.Artist, track.Title))
 		// search for song by artist and title
 		trackResponse, trackErr := doGetRequest(fmt.Sprintf("https://api.spotify.com/v1/search?type=track&q=%s", query), bearerHeader)
 		if trackErr != nil {
@@ -87,7 +56,7 @@ func addSongsFromRadioToPlaylist(radioURL, playlistID, spotifyToken string) (err
 		// just pick the first found track
 		if len(trackData.Tracks.Items) > 0 {
 			item := trackData.Tracks.Items[0]
-			fmt.Printf("Add track %s: %s\n", track.Artist, track.Song)
+			fmt.Printf("Add track %s: %s\n", track.Artist, track.Title)
 			songIds = append(songIds, item.URI)
 			removeIds = append(removeIds, &SpotifyRemoveItem{URI: item.URI})
 		}

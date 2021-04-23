@@ -3,38 +3,32 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 )
 
 const (
 	argIndexPlayListID = 1
+	argIndexRadioType  = 2
 	sleepSeconds       = 5
 )
 
+type Track struct {
+	Artist string
+	Title  string
+}
+
 func main() {
-	if len(os.Args) < (argIndexPlayListID + 1) {
-		panic("please provide playlist id as command line argument")
+	if len(os.Args) < (argIndexRadioType + 1) {
+		panic("playlist id and radio type (christmas/esc) missing")
 	}
 
 	playlistID := os.Args[argIndexPlayListID]
+	radioType := os.Args[argIndexRadioType]
 	sToken := fetchUserToken()
 
-	// loop all interesting lists
-	radioUrls := []string{
-		"https://jouluradio-wp.production.geniem.io/viimeksi-soitetut/",
-		"https://jouluradio-wp.production.geniem.io/viimeksi-soitetut/?kanava=indiejoulu",
-		"https://jouluradio-wp.production.geniem.io/viimeksi-soitetut/?kanava=jazzjoulu",
-		"https://jouluradio-wp.production.geniem.io/viimeksi-soitetut/?kanava=klassinen-joulu",
+	if radioType == "christmas" {
+		addChristmasRadioLists(playlistID, sToken)
+	} else if radioType == "esc" {
+		addLatestEscRadioSongs(playlistID, sToken)
 	}
-	for _, radioURL := range radioUrls {
-		fmt.Printf("Adding songs from %s\n", radioURL)
-		if err := addSongsFromRadioToPlaylist(radioURL, playlistID, sToken); err != nil {
-			fmt.Printf("Error when adding songs %s\n", err.Error())
-		}
-		fmt.Printf("Sleeping a while...\n")
-		time.Sleep(sleepSeconds * time.Second)
-	}
-
-	fmt.Println("All done! Merry Christmas! Hyvää joulua!")
 	fmt.Printf("https://open.spotify.com/playlist/%s\n", playlistID)
 }
