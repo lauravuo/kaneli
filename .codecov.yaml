@@ -2,4 +2,8 @@ coverage:
   status:
     project:
       default:
+        target: auto
+    patch:
+      default:
         target: 85%
+        only_pulls: true
