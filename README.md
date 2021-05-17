@@ -1,5 +1,7 @@
 # kaneli
 
+[![codecov](https://codecov.io/gh/lauravuo/kaneli/branch/main/graph/badge.svg?token=B114SWMYBC)](https://codecov.io/gh/lauravuo/kaneli)
+
 Kaneli (cinnamon in Finnish) is a command line program that adds songs from [Jouluradio](https://www.jouluradio.fi/)'s playlist to a user chosen Spotify playlist.
 
 ## Setup
